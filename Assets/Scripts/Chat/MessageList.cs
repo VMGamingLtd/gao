@@ -14,6 +14,8 @@ namespace Chat
 
     public class MessageList : MonoBehaviour
     {
+        private static string CLASS_NAME = typeof(MessageList).Name;
+
         private static int MAX_SCROLL_LIST_LINES_COUNT = 1000;
         private static int MAX_MESSAGE_COUNT_TO_PULL = 5;
 
@@ -179,13 +181,19 @@ namespace Chat
 
         private async UniTaskVoid ReadMessagesLoop()
         {
+            const string METHOD_NAME = "ReadMessagesLoop()";
             await EnsureChatRoomExists();
+            if (ChatRoomId == -1)
+            {
+                Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: no chatroom");
+                return;
+            }
 
             ReadMessagesLoopWaitCancellationTokenSource = new System.Threading.CancellationTokenSource();
             while (true)
             {
 
-                // read last messages
+                // read last messages first
                 int cntBefore = AllMessages.Count;
                 int firstMessageIdBefore = AllMessages.Count > 0 ? AllMessages.First.Value.message.MessageId : -1;
                 await readLastMessages();
@@ -195,11 +203,11 @@ namespace Chat
                 }
                 int cntAfter = AllMessages.Count;
                 int firstMessageIdAfter = AllMessages.Count > 0 ? AllMessages.First.Value.message.MessageId : -1;
-                if (cntBefore != cntAfter)
+                if (cntBefore != cntAfter) // if we added new messages
                 {
                     DisplayAllMessages();
                 }
-                else if (firstMessageIdBefore != firstMessageIdAfter)
+                else if (firstMessageIdBefore != firstMessageIdAfter) // if we trimmed the messages because of limit on the max number of messages
                 {
                     DisplayAllMessages();
                 }
@@ -216,11 +224,11 @@ namespace Chat
                     }
                     cntAfter = AllMessages.Count;
                     firstMessageIdAfter = AllMessages.Count > 0 ? AllMessages.First.Value.message.MessageId : -1;
-                    if (cntBefore != cntAfter)
+                    if (cntBefore != cntAfter) // if we added new messages
                     {
                         DisplayAllMessages();
                     }
-                    else if (firstMessageIdBefore != firstMessageIdAfter)
+                    else if (firstMessageIdBefore != firstMessageIdAfter) // if we trimmed the messages because of limit on the max number of messages
                     {
                         DisplayAllMessages();
                     }
@@ -238,7 +246,7 @@ namespace Chat
                 // sleep
                 try
                 {
-                    await UniTask.Delay(System.TimeSpan.FromSeconds(5), ignoreTimeScale: false, PlayerLoopTiming.Update, ReadMessagesLoopWaitCancellationTokenSource.Token);
+                    await UniTask.Delay(System.TimeSpan.FromSeconds(1), ignoreTimeScale: false, PlayerLoopTiming.Update, ReadMessagesLoopWaitCancellationTokenSource.Token);
                 }
                 catch (System.OperationCanceledException)
                 {
@@ -252,16 +260,31 @@ namespace Chat
 
         private string MakeChatRoomName()
         {
-            string name = $"Friends_{Gaos.Context.Authentication.GetUserName()}_{FriendUsername}";
-            return name;
+            const string METHOD_NAME = "MakeChatRoomName()";
 
+            //string name = $"Friends_{Gaos.Context.Authentication.GetUserName()}_{FriendUsername}";
+            if (FriendUsername != null && FriendUsername.Length > 0)
+            {
+                string name = $"Friends_{FriendUsername}";
+                return name;
+            }
+            else
+            {
+                Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: FriendUsername is null or empty");
+                return null;
+            }
         }
 
         private async UniTask EnsureChatRoomExists()
         {
             int previousChatRoomId = ChatRoomId;
             ChatRoomName = MakeChatRoomName();
-            ChatRoomId = await Gaos.ChatRoom.ChatRoom.EnsureChatRoomExists.CallAsync(ChatRoomName);
+            if (ChatRoomName == null)
+            {
+                ChatRoomId = -1;
+                return;
+            }
+            ChatRoomId = await Gaos.ChatRoom.ChatRoom.EnsureChatRoomExists.CallAsync(ChatRoomName, true);
             if (ChatRoomId != previousChatRoomId)
             {
                 AllMessages.Clear();

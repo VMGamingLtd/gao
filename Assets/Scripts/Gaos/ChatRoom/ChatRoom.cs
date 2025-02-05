@@ -49,7 +49,7 @@ namespace Gaos.ChatRoom.ChatRoom
     {
         public readonly static string CLASS_NAME = typeof(CreateChatRoom).Name;
 
-        public static async UniTask<Gaos.Routes.Model.ChatRoomJson.CreateChatRoomResponse> CallAsync(string chatRoomName)
+        public static async UniTask<Gaos.Routes.Model.ChatRoomJson.CreateChatRoomResponse> CallAsync(string chatRoomName, bool isFriendsChatRoom)
         {
             const string METHOD_NAME = "CallAsync()";
             try
@@ -57,6 +57,7 @@ namespace Gaos.ChatRoom.ChatRoom
 
                 Gaos.Routes.Model.ChatRoomJson.CreateChatRoomRequest request = new Gaos.Routes.Model.ChatRoomJson.CreateChatRoomRequest();
                 request.ChatRoomName = chatRoomName;
+                request.IsFriedndsChatroom = isFriendsChatRoom;
                 string requestJsonStr = JsonConvert.SerializeObject(request);
                 Gaos.Api.ApiCall apiCall = new Gaos.Api.ApiCall("api/chatRoom/createChatRoom", requestJsonStr);
                 await apiCall.CallAsync();
@@ -89,7 +90,7 @@ namespace Gaos.ChatRoom.ChatRoom
         public readonly static string CLASS_NAME = typeof(EnsureChatRoomExists).Name;
 
         // Returns the chat room id if chat romm exists, otherwise returns -1
-        public static async UniTask<int> CallAsync(string chatRoomName)
+        public static async UniTask<int> CallAsync(string chatRoomName, bool isFriendsChatRoom)
         {
             const string METHOD_NAME = "CallAsync()";
             try
@@ -99,7 +100,7 @@ namespace Gaos.ChatRoom.ChatRoom
                 if (existsChatRoomResponse.IsExists == false)
                 {
                     // Create new chat room
-                    Gaos.Routes.Model.ChatRoomJson.CreateChatRoomResponse createChatRoomResponse = await CreateChatRoom.CallAsync(chatRoomName);
+                    Gaos.Routes.Model.ChatRoomJson.CreateChatRoomResponse createChatRoomResponse = await CreateChatRoom.CallAsync(chatRoomName, isFriendsChatRoom);
                     return createChatRoomResponse.ChatRoomId;
                 }
                 else
