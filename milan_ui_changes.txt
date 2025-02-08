@@ -7,7 +7,24 @@ In gmeobject Canvas / FriendsTab / Content / TopButtons
 	- added Chat button
 3)
 In gmeobject Canvas / FriendsTab
-	- for whatever window opened from asny FriendsTab icon close FriendsTab window
-In gmeobject Canvas / FriendsTab / TopButtons
-    - added script 
+	- for whatever window opened from any FriendsTab icon close FriendsTab window
+In gmeobject Canvas / FriendsTab / Content / TopButtons
+    - added script ResetChildButtonsStateToNormal 
+4)
+Replace Canvas / MultiplayerGroupRequests by the one from milan scene
+
+5)
+In Canvas / MultiplayerGroupAddPlayer / Title / Title
+  - replace translate text 'Add Friend'  by  'Add to group'
+
+6)
+In Canvas / MultiplayerGroupRequests / Friends / Title
+  - replace translate text 'Friend request list'  by  'GroupRequestList'
+
+7)
+In gmeobject Canvas / MultiplayerGroupTab
+    - for whatever window opened from any MultiplayerGroupTab icon close MultiplayerGroupTab window
+In gmeobject Canvas / MultiplayerGroupTab / Content / TopButtons
+    - added script ResetChildButtonsStateToNormal
+
 

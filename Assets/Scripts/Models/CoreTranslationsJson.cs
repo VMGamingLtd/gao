@@ -2624,6 +2624,13 @@
             ""chinese"": ""添加组成员"",
             ""slovak"": ""Pridať člena skupiny""
         },
+        {
+            ""identifier"": ""Add to group"",
+            ""english"": ""Add to group"",
+            ""russian"": ""Добавить в группу"",
+            ""chinese"": ""添加到组"",
+            ""slovak"": ""Pridať do skupiny""
+        },
         
       {
         ""identifier"": ""Ignite"",

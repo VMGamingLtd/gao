@@ -40,12 +40,14 @@ namespace Friends
         public GameObject RemoveFromGroupDialog;
         public TMP_Text RemoveFriomGroupDialogText;
 
+        public GameObject MultiplayerAddPlayerButton;
+
         private string State_RemoveFromGroupDialog_message; 
         private int State_RemoveFromGroupDialog_index_filtered; 
 
 
         //public GameObject SearchTextBox;
-        public TMP_InputField SearchTextBox;
+        //public TMP_InputField SearchTextBox;
 
         private FriendModel[] AllUsers = new FriendModel[MAX_SCROLL_LIST_LINES_COUNT]; 
         private int LastIndexAllUsers = -1;
@@ -145,10 +147,31 @@ namespace Friends
             }
         }
 
+        private void DisableOrEnableAddToGroupButton()
+        {
+            if (GetMyGroupResponse.IsGroupOwner)
+            {
+                // I can add group members if I am group owner 
+                MultiplayerAddPlayerButton.SetActive(true);
+            }
+            else
+            {
+                if (GetMyGroupResponse.IsGroupMember)
+                {
+                    // If I am member of the group, I cannot add group members
+                    MultiplayerAddPlayerButton.SetActive(false);
+                }
+                else
+                {
+                    // I am neither gorup owner nor group membe, I can form a group by inviting other users to join my group.
+                    // I any users joins, new group will be created with me as group owner.
+                    MultiplayerAddPlayerButton.SetActive(true);
+                }
+            }
+        }
+
         private async UniTaskVoid Init()
         {
-            bool isOnSearchTextBoxChange = false;
-
             // get my group
 
             GetMyGroupResponse = await Gaos.Groups.Groups.GetMyGroup.CallAsync();
@@ -157,13 +180,9 @@ namespace Friends
                 return;
             }
             SetTitleText();
+            DisableOrEnableAddToGroupButton();
 
             await GuiReadAllUsersList();
-
-            if (!isOnSearchTextBoxChange)
-            {
-                SearchTextBox.onValueChanged.AddListener(OnSearchTextBoxChange);
-            }
 
         }
 
@@ -403,13 +422,11 @@ namespace Friends
         public void OnEnable()
         {
             RemoveAllFriendsButtons();
-            SearchTextBox.text = ""; 
             Init().Forget();
         }
 
         public void OnDisable()
         {
-            SearchTextBox.onValueChanged.RemoveListener(OnSearchTextBoxChange);
 
         }
 
@@ -500,20 +517,6 @@ namespace Friends
             Title.SetActive(false);
             LeaveGroupDialog.SetActive(false);
             RemoveFromGroupDialog.SetActive(true);
-        }
-
-        private async UniTaskVoid OnSearchButtonClickAsync(string userNamePattern)
-        {
-            await GuiReadAllUsersList();
-        }
-
-
-        public void OnSearchButtonClick()
-        {
-            Debug.Log($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ cp 400: OnSearchIconClick(): {SearchTextBox.text}");
-            SearchTextBox.text = "";
-            OnSearchButtonClickAsync(SearchTextBox.text).Forget();
-            DisplayTitle();
         }
 
     }
