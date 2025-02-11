@@ -34,6 +34,7 @@ namespace Friends
 
         public TMP_InputField SearchTextBox;
 
+
         void Start()
         {
         }

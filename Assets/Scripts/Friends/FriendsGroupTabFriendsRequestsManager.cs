@@ -41,6 +41,8 @@ namespace Friends
         private GameObject[] AllRequestsButtons = new GameObject[MAX_SCROLL_LIST_LINES_COUNT]; // all friend request buttons in the scroll list
         private int LastIndexAllRequestsButtons = -1;
 
+        public GameObject MultiplayerGroupTab;
+
         FriendsGroupTabFriendsRequestsManager()
         {
         }
@@ -100,7 +102,15 @@ namespace Friends
             if (response == null)
             {
                 // error occurred
-                return; 
+                return;
+            }
+            else
+            {
+                // display group tab
+                gameObject.SetActive(false);
+                MultiplayerGroupTab.SetActive(true);
+                Animator animator = MultiplayerGroupTab.GetComponent<Animator>();
+                animator.Play("Window In");
             }
         }
 
@@ -118,6 +128,7 @@ namespace Friends
 
             // Clear all friend requests from the display.
             ClearAllFriendRequests();
+
         }
 
         private UnityAction MakeOnButtonAcceptClicked(int index)

@@ -26,5 +26,11 @@ In gmeobject Canvas / MultiplayerGroupTab
     - for whatever window opened from any MultiplayerGroupTab icon close MultiplayerGroupTab window
 In gmeobject Canvas / MultiplayerGroupTab / Content / TopButtons
     - added script ResetChildButtonsStateToNormal
+In gmeobject Canvas / MultiplayerGroupTab / MultiplayerGroupTab  script
+    - set reference MultiplayerAddPlayerButton
+In gmeobject Canvas / MultiplayerGroupTab / MultiplayerGroupTab script
+    - set reference  MultiplayerGroupRequestsButton
+In gmeobject Canvas / MultiplayerGroupTab / MultiplayerGroupRequests script
+    - set reference  MultiplayerGroupTab
 
 

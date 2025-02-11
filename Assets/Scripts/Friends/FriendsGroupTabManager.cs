@@ -35,21 +35,22 @@ namespace Friends
         public GameObject LeaveGroupDialog;
         public TMP_Text LeaveGroupDialogText;
 
-        private string State_LeaveGroupDialog_message; 
+        private string State_LeaveGroupDialog_message;
 
         public GameObject RemoveFromGroupDialog;
         public TMP_Text RemoveFriomGroupDialogText;
 
         public GameObject MultiplayerAddPlayerButton;
+        public GameObject MultiplayerGroupRequestsButton;
 
-        private string State_RemoveFromGroupDialog_message; 
-        private int State_RemoveFromGroupDialog_index_filtered; 
+        private string State_RemoveFromGroupDialog_message;
+        private int State_RemoveFromGroupDialog_index_filtered;
 
 
         //public GameObject SearchTextBox;
         //public TMP_InputField SearchTextBox;
 
-        private FriendModel[] AllUsers = new FriendModel[MAX_SCROLL_LIST_LINES_COUNT]; 
+        private FriendModel[] AllUsers = new FriendModel[MAX_SCROLL_LIST_LINES_COUNT];
         private int LastIndexAllUsers = -1;
 
         private int[] FilteredUsers = new int[MAX_SCROLL_LIST_LINES_COUNT];
@@ -64,7 +65,7 @@ namespace Friends
         {
         }
 
-        private async UniTask  GuiReadAllUsersList()
+        private async UniTask GuiReadAllUsersList()
         {
             RemoveAllFriendsButtons();
             await ReadAllUsers();
@@ -78,8 +79,8 @@ namespace Friends
         {
             if (GetMyGroupResponse.IsGroupOwner)
             {
-                string message =  "My Group";
-                switch(Application.systemLanguage)
+                string message = "My Group";
+                switch (Application.systemLanguage)
                 {
                     case SystemLanguage.English:
                         message = "My Group";
@@ -101,8 +102,8 @@ namespace Friends
             }
             else if (GetMyGroupResponse.IsGroupMember)
             {
-                string message =  $"Group - {GetMyGroupResponse.GroupOwnerName}";
-                switch(Application.systemLanguage)
+                string message = $"Group - {GetMyGroupResponse.GroupOwnerName}";
+                switch (Application.systemLanguage)
                 {
                     case SystemLanguage.English:
                         message = $"Group - {GetMyGroupResponse.GroupOwnerName}";
@@ -124,8 +125,8 @@ namespace Friends
             }
             else
             {
-                string message =  "No Group";
-                switch(Application.systemLanguage)
+                string message = "No Group";
+                switch (Application.systemLanguage)
                 {
                     case SystemLanguage.English:
                         message = "No Group";
@@ -153,6 +154,9 @@ namespace Friends
             {
                 // I can add group members if I am group owner 
                 MultiplayerAddPlayerButton.SetActive(true);
+
+                // Nobody can add me to his group as I am group owner (groups are exclusive)
+                MultiplayerGroupRequestsButton.SetActive(false);
             }
             else
             {
@@ -160,12 +164,17 @@ namespace Friends
                 {
                     // If I am member of the group, I cannot add group members
                     MultiplayerAddPlayerButton.SetActive(false);
+                    // As I am already member of the group, I cannot be added to other groups
+                    MultiplayerGroupRequestsButton.SetActive(false);
                 }
                 else
                 {
-                    // I am neither gorup owner nor group membe, I can form a group by inviting other users to join my group.
-                    // I any users joins, new group will be created with me as group owner.
+                    // I am neither gorup owner nor group member, I can form a group by inviting other users to join my group.
+                    // If any users joins, new group will be created with me as group owner.
                     MultiplayerAddPlayerButton.SetActive(true);
+
+                    // If am meither group owner nor group member, I can be added to other groups
+                    MultiplayerGroupRequestsButton.SetActive(true);
                 }
             }
         }
@@ -200,19 +209,20 @@ namespace Friends
             if (response == null)
             {
                 // error occured
-                return; 
+                return;
             }
             LastIndexAllUsers = -1;
             if (response == null)
             {
-                return; 
+                return;
             }
 
             for (int i = 0; i < response.Users.Length; i++)
             {
 
                 // fill in friends array
-                AllUsers[++LastIndexAllUsers] = new FriendModel {
+                AllUsers[++LastIndexAllUsers] = new FriendModel
+                {
                     UserId = response.Users[i].UserId,
                     UserName = response.Users[i].UserName,
                     Gui_IsLineVisible = true
@@ -241,7 +251,7 @@ namespace Friends
 
             }
         }
-        
+
         private void FilterUsers(string substring)
         {
             LastIndexFilteredUsers = -1;
@@ -284,7 +294,7 @@ namespace Friends
             DisplayLeaveGroupDialog();
         }
 
-        private UnityAction  MakeOnButtonLeaveGroupClicked(int index_filtered)
+        private UnityAction MakeOnButtonLeaveGroupClicked(int index_filtered)
         {
             return () =>
             {
@@ -325,7 +335,7 @@ namespace Friends
             DisplayRemoveFromGroupDialog();
         }
 
-        private UnityAction  MakeOnButtonRemoveFromGroupClicked(int index_filtered)
+        private UnityAction MakeOnButtonRemoveFromGroupClicked(int index_filtered)
         {
             return () =>
             {
@@ -334,7 +344,7 @@ namespace Friends
         }
 
         public void DisplayFriendButton(int index_filtered)
-        { 
+        {
             int index_all = FilteredUsers[index_filtered];
             FriendModel user = AllUsers[index_all];
 
@@ -419,10 +429,15 @@ namespace Friends
             DisplayTitle();
         }
 
-        public void OnEnable()
+        private void InitAll()
         {
             RemoveAllFriendsButtons();
             Init().Forget();
+        }
+
+        public void OnEnable()
+        {
+            InitAll();
         }
 
         public void OnDisable()
@@ -447,6 +462,10 @@ namespace Friends
                 // error occured
                 return;
             }
+            else
+            {
+                // success
+            }
         }
 
         public void OnButtonLeaveFromGroupYes()
@@ -463,6 +482,9 @@ namespace Friends
             AllocateFriendsButtons();
             LastIndexFilteredUsers = -1;
             DisplayFilteredUsers();
+
+            // readraw all to ensure thatr display reflects the server state
+            InitAll();
         }
 
         public void OnButtonLeaveFromGroupNo()
@@ -504,9 +526,13 @@ namespace Friends
             FriendModel user = AllUsers[index_all];
             user.Gui_IsLineVisible = false;
             DisplayFilteredUsers();
+
+            // readraw all to ensure thatr display reflects the server state
+            InitAll();
         }
 
-        public void OnButtonRemoveFromGroupNo() {
+        public void OnButtonRemoveFromGroupNo()
+        {
             DisplayTitle();
         }
 
