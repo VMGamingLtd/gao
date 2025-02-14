@@ -1,13 +1,15 @@
 1)
 In gameobject Account / FriendsTab /  GuiTemplates /  FrriendsButton / Chat
-	- In script ChatOpener, fixed the reference to MessageList 
-	- In OnClik event, set active game object Account / FriendsPanel / ChatTab 
+	- removed ChatOpenerForFriends script
+	- removed onClick event chatTab.setActive()
 2)
 In gmeobject Canvas / FriendsTab / Content / TopButtons 
 	- added Chat button
 3)
 In gmeobject Canvas / FriendsTab
 	- for whatever window opened from any FriendsTab icon close FriendsTab window
+	- added referecce to MessageList script
+	- added reference chatTab  
 In gmeobject Canvas / FriendsTab / Content / TopButtons
     - added script ResetChildButtonsStateToNormal 
 4)

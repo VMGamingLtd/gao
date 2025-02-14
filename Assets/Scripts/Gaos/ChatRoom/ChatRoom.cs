@@ -280,4 +280,54 @@ namespace Gaos.ChatRoom.ChatRoom
         }
 
     }
+
+    public class GetUserToFriendChatRoom
+    {
+        public readonly static string CLASS_NAME = typeof(GetUserToFriendChatRoom).Name;
+
+        public static async UniTask<Gaos.Routes.Model.ChatRoomJson.GetUserToFriendChatRoomResponse> CallAsync(int friendId)
+        {
+            const string METHOD_NAME = "CallAsync()";
+            try
+            {
+                // Build the request object
+                Gaos.Routes.Model.ChatRoomJson.GetUserToFriendChatRoomRequest request = new Gaos.Routes.Model.ChatRoomJson.GetUserToFriendChatRoomRequest();
+                request.FriendId = friendId;
+
+                // Serialize request to JSON
+                string requestJsonStr = JsonConvert.SerializeObject(request);
+
+                // Create and call the API endpoint
+                Gaos.Api.ApiCall apiCall = new Gaos.Api.ApiCall("api/chatRoom/getUserToFriendChatRoom", requestJsonStr);
+                await apiCall.CallAsync();
+
+                // Check for transport-level errors
+                if (apiCall.IsResponseError)
+                {
+                    Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: ERROR: error getting chat room");
+                    return null;
+                }
+                else
+                {
+                    // Deserialize the response from JSON
+                    Gaos.Routes.Model.ChatRoomJson.GetUserToFriendChatRoomResponse response =
+                        JsonConvert.DeserializeObject<Gaos.Routes.Model.ChatRoomJson.GetUserToFriendChatRoomResponse>(apiCall.ResponseJsonStr);
+
+                    // Check if the API returned an error
+                    if (response.IsError == true)
+                    {
+                        Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {response.ErrorMessage}");
+                        return null;
+                    }
+
+                    return response;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
+                return null;
+            }
+        }
+    }
 }

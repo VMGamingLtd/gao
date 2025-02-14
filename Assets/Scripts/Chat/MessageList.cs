@@ -32,20 +32,15 @@ namespace Chat
 
         private bool IsFinished = false;
 
-        private string FriendUsername;
         public GameObject FriendListButton;
 
         private int DbMinMessageId;
         private int DbMaxMessageId;
         private int DbMessageCount;
 
-        public void SetFriendUserName(string username)
+        public void SetChatRoomName(string chatRoomName)
         {
-            FriendUsername = username;
-
-            Transform nicknameObject = FriendListButton.transform.Find("Info/Nickname");
-            TextMeshProUGUI nicknameObjectTMP = nicknameObject.GetComponent<TextMeshProUGUI>();
-            nicknameObjectTMP.text = FriendUsername;
+            ChatRoomName = chatRoomName;
         }
 
         public int GetChatRoomId()
@@ -258,27 +253,9 @@ namespace Chat
             }
         }
 
-        private string MakeChatRoomName()
-        {
-            const string METHOD_NAME = "MakeChatRoomName()";
-
-            //string name = $"Friends_{Gaos.Context.Authentication.GetUserName()}_{FriendUsername}";
-            if (FriendUsername != null && FriendUsername.Length > 0)
-            {
-                string name = $"Friends_{FriendUsername}";
-                return name;
-            }
-            else
-            {
-                Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: FriendUsername is null or empty");
-                return null;
-            }
-        }
-
         private async UniTask EnsureChatRoomExists()
         {
             int previousChatRoomId = ChatRoomId;
-            ChatRoomName = MakeChatRoomName();
             if (ChatRoomName == null)
             {
                 ChatRoomId = -1;

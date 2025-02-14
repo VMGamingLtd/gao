@@ -40,7 +40,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return null;
             }
         }
 
@@ -81,7 +81,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return null;
             }
         }
 
@@ -119,7 +119,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return null;
             }
         }
     }
@@ -156,7 +156,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return null;
             }
         }
     }
@@ -192,7 +192,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return null;
             }
         }
     }
@@ -238,7 +238,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return null;
             }
         }
     }
@@ -275,7 +275,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return 0;
             }
         }
     }
@@ -312,7 +312,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return null;
             }
         }
     }
@@ -349,7 +349,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return null;
             }
         }
     }
@@ -386,7 +386,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return null;
             }
         }
     }
@@ -426,7 +426,7 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return null;
             }
         }
     }
@@ -465,10 +465,11 @@ namespace Gaos.Groups.Groups
             catch (System.Exception ex)
             {
                 Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
-                throw ex;
+                return 0;
             }
         }
+
     }
-        
+
 
 }

@@ -31,6 +31,11 @@ namespace Friends
         public GameObject RemoveFromFriendsDialog;
         public TMP_Text RemoveFriomFriendsDialogText;
 
+        // reference to gameobject ChatTab / Viewport / MESSAGELIST
+        public Chat.MessageList messageList;
+        // reference to gameobject ChatTabs
+        public GameObject chatTab;
+
         private string State_RemoveFromFriendsDialog_message; 
         private int State_RemoveFromFriendsDialog_index_filtered; 
 
@@ -267,6 +272,32 @@ namespace Friends
             };
         }
 
+        private async UniTaskVoid OnButtonChatClickedAsync(int index_filtered)
+        {
+            Debug.Log($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ cp 400: OnButtonChatClicked(): {index_filtered}");
+            int index_all = FilteredUsers[index_filtered];
+            FriendModel user = AllUsers[index_all];
+
+            Gaos.Routes.Model.ChatRoomJson.GetUserToFriendChatRoomResponse responseChatRoom = await Gaos.ChatRoom.ChatRoom.GetUserToFriendChatRoom.CallAsync(user.UserId);
+            Debug.Log($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ cp 500: chatroom name: {responseChatRoom.ChatRoomName}");
+            messageList.SetChatRoomName(responseChatRoom.ChatRoomName);
+            chatTab.SetActive(true);
+
+        }
+
+        private void OnButtonChatClicked(int index_filtered)
+        {
+            OnButtonChatClickedAsync(index_filtered).Forget();
+        }
+
+        private UnityAction MakeOnButtonChatClicked(int index_filtered)
+        {
+            return () =>
+            {
+                OnButtonChatClicked(index_filtered);
+            };
+        }
+
         public void DisplayFriendButton(int index_filtered)
         { 
             int index_all = FilteredUsers[index_filtered];
@@ -283,11 +314,20 @@ namespace Friends
             Transform childObject_buttonRemoveFromGroup = AllFriendsButtons[index_all].transform.Find("ButtonRemoveFromFriends");
             Button buttonRemoveFromGroup = childObject_buttonRemoveFromGroup.GetComponent<Button>();
 
+            Transform childObject_buttonChat = AllFriendsButtons[index_all].transform.Find("Chat");
+            Button buttonChat = childObject_buttonChat.GetComponent<Button>();
+
             childObject_buttonRemoveFromGroup.gameObject.SetActive(false);
+            childObject_buttonChat.gameObject.SetActive(false);
 
             buttonRemoveFromGroup.onClick.RemoveAllListeners();
             buttonRemoveFromGroup.onClick.AddListener(MakeOnButtonRemoveFromGFriendsClicked(index_filtered));
             childObject_buttonRemoveFromGroup.gameObject.SetActive(true);
+
+            buttonChat.onClick.RemoveAllListeners();
+            buttonChat.onClick.AddListener(MakeOnButtonChatClicked(index_filtered));
+            childObject_buttonChat.gameObject.SetActive(true);
+
 
         }
 
