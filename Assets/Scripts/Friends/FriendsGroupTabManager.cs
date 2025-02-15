@@ -43,6 +43,13 @@ namespace Friends
         public GameObject MultiplayerAddPlayerButton;
         public GameObject MultiplayerGroupRequestsButton;
 
+        // reference to gameobject ChatTab / Viewport / MESSAGELIST
+        public Chat.MessageList messageList;
+        // reference to gameobject ChatTab
+        public GameObject chatTab;
+
+        public GameObject groupChatButton;
+
         private string State_RemoveFromGroupDialog_message;
         private int State_RemoveFromGroupDialog_index_filtered;
 
@@ -343,6 +350,31 @@ namespace Friends
             };
         }
 
+        private async UniTaskVoid OnButtonChatClickedAsync(int index_filtered)
+        {
+            Debug.Log($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ cp 400: OnButtonChatClicked(): {index_filtered}");
+            int index_all = FilteredUsers[index_filtered];
+            FriendModel user = AllUsers[index_all];
+
+            Gaos.Routes.Model.ChatRoomJson.GetUserToFriendChatRoomResponse responseChatRoom = await Gaos.ChatRoom.ChatRoom.GetUserToFriendChatRoom.CallAsync(user.UserId);
+            Debug.Log($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ cp 500: chatroom name: {responseChatRoom.ChatRoomName}");
+            messageList.SetChatRoomName(responseChatRoom.ChatRoomName);
+            chatTab.SetActive(true);
+        }
+
+        private void OnButtonChatClicked(int index_filtered)
+        {
+            OnButtonChatClickedAsync(index_filtered).Forget();
+        }
+
+        private UnityAction MakeOnButtonChatClicked(int index_filtered)
+        {
+            return () =>
+            {
+                OnButtonChatClicked(index_filtered);
+            };
+        }
+
         public void DisplayFriendButton(int index_filtered)
         {
             int index_all = FilteredUsers[index_filtered];
@@ -362,8 +394,12 @@ namespace Friends
             Transform childObject_buttonRemoveFromGroup = AllFriendsButtons[index_all].transform.Find("ButtonRemoveFromGroup");
             Button buttonRemoveFromGroup = childObject_buttonRemoveFromGroup.GetComponent<Button>();
 
+            Transform childObject_buttonChat = AllFriendsButtons[index_all].transform.Find("Chat");
+            Button buttonChat = childObject_buttonChat.GetComponent<Button>();
+
             childObject_buttonLeaveGroup.gameObject.SetActive(false);
             childObject_buttonRemoveFromGroup.gameObject.SetActive(false);
+            childObject_buttonChat.gameObject.SetActive(false);
 
             if (GetMyGroupResponse.IsGroupOwner)
             {
@@ -380,6 +416,10 @@ namespace Friends
                     childObject_buttonLeaveGroup.gameObject.SetActive(true);
                 }
             }
+
+            buttonChat.onClick.RemoveAllListeners();
+            buttonChat.onClick.AddListener(MakeOnButtonChatClicked(index_filtered));
+            childObject_buttonChat.gameObject.SetActive(true);
 
         }
 
@@ -545,7 +585,25 @@ namespace Friends
             RemoveFromGroupDialog.SetActive(true);
         }
 
+        private async UniTask OnGroupChatButtonClickAsync()
+        {
+            Gaos.Routes.Model.ChatRoomJson.GetGroupChatRoomResponse responseChatRoom = await Gaos.ChatRoom.ChatRoom.GetGroupChatRoom.CallAsync();
+            if (responseChatRoom == null)
+            {
+                return;
+            }
+            Debug.Log($"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ cp 500: chatroom name: {responseChatRoom.ChatRoomName}");
+            messageList.SetChatRoomName(responseChatRoom.ChatRoomName);
+            chatTab.SetActive(true);
+        }
+
+        public void OnGroupChatButtonClick()
+        {
+            OnGroupChatButtonClickAsync().Forget();
+
+        }
     }
+
 
 }
 

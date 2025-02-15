@@ -33,7 +33,7 @@ namespace Friends
 
         // reference to gameobject ChatTab / Viewport / MESSAGELIST
         public Chat.MessageList messageList;
-        // reference to gameobject ChatTabs
+        // reference to gameobject ChatTab
         public GameObject chatTab;
 
         private string State_RemoveFromFriendsDialog_message; 

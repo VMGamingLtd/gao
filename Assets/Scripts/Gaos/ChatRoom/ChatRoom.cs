@@ -330,4 +330,53 @@ namespace Gaos.ChatRoom.ChatRoom
             }
         }
     }
+
+    public class GetGroupChatRoom
+    {
+        public readonly static string CLASS_NAME = typeof(GetGroupChatRoom).Name;
+
+        public static async UniTask<Gaos.Routes.Model.ChatRoomJson.GetGroupChatRoomResponse> CallAsync()
+        {
+            const string METHOD_NAME = "CallAsync()";
+            try
+            {
+                // Build the request object
+                Gaos.Routes.Model.ChatRoomJson.GetGroupChatRoomRequest request = new Gaos.Routes.Model.ChatRoomJson.GetGroupChatRoomRequest();
+
+                // Serialize request to JSON
+                string requestJsonStr = JsonConvert.SerializeObject(request);
+
+                // Create and call the API endpoint
+                Gaos.Api.ApiCall apiCall = new Gaos.Api.ApiCall("api/chatRoom/getGroupChatRoom", requestJsonStr);
+                await apiCall.CallAsync();
+
+                // Check for transport-level errors
+                if (apiCall.IsResponseError)
+                {
+                    Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: ERROR: error getting chat room");
+                    return null;
+                }
+                else
+                {
+                    // Deserialize the response from JSON
+                    Gaos.Routes.Model.ChatRoomJson.GetGroupChatRoomResponse response =
+                        JsonConvert.DeserializeObject<Gaos.Routes.Model.ChatRoomJson.GetGroupChatRoomResponse>(apiCall.ResponseJsonStr);
+
+                    // Check if the API returned an error
+                    if (response.IsError == true)
+                    {
+                        Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {response.ErrorMessage}");
+                        return null;
+                    }
+
+                    return response;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
+                return null;
+            }
+        }
+    }
 }

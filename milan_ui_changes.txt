@@ -4,7 +4,7 @@ In gameobject Account / FriendsTab /  GuiTemplates /  FrriendsButton / Chat
 	- removed onClick event chatTab.setActive()
 2)
 In gmeobject Canvas / FriendsTab / Content / TopButtons 
-	- added Chat button
+
 3)
 In gmeobject Canvas / FriendsTab
 	- for whatever window opened from any FriendsTab icon close FriendsTab window
@@ -26,6 +26,7 @@ In Canvas / MultiplayerGroupRequests / Friends / Title
 7)
 In gmeobject Canvas / MultiplayerGroupTab
     - for whatever window opened from any MultiplayerGroupTab icon close MultiplayerGroupTab window
+	- in script set references messageList, chatTab
 In gmeobject Canvas / MultiplayerGroupTab / Content / TopButtons
     - added script ResetChildButtonsStateToNormal
 In gmeobject Canvas / MultiplayerGroupTab / MultiplayerGroupTab  script

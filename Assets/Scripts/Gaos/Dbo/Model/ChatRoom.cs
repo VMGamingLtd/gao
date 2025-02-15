@@ -9,6 +9,7 @@ namespace Gaos.Dbo.Model
         public int OwnerId;
         public User? Owner;
         public bool IsFriedndsChatroom;
+        public bool IsGroupChatroom;
 
     }
 }
