@@ -10,11 +10,14 @@ namespace Friends
 {
     public class FriendsTabManager : MonoBehaviour
     {
+        public readonly static string CLASS_NAME = typeof(FriendsTabManager).Name;
+
         public class FriendModel
         {
             public string UserName { get; set; }
             public int UserId { get; set; }
             public bool Gui_IsLineVisible { get; set; }
+
         }
 
         //private static int MAX_SCROLL_LIST_LINES_CPUNT = 100;
@@ -26,7 +29,7 @@ namespace Friends
         public GameObject Title;
         public TMP_Text TitleText;
 
-
+        public TMP_Text FriendRequestsCount;
 
         public GameObject RemoveFromFriendsDialog;
         public TMP_Text RemoveFriomFriendsDialogText;
@@ -48,6 +51,9 @@ namespace Friends
         private int[] FilteredUsers = new int[MAX_SCROLL_LIST_LINES_COUNT];
         private int LastIndexFilteredUsers = -1;
 
+        // dictionary of user if to FilteredUsers index
+        private Dictionary<int, int> UserToFilteredUsersIndex = new Dictionary<int, int>();
+
         private GameObject[] AllFriendsButtons = new GameObject[MAX_SCROLL_LIST_LINES_COUNT]; // all friends buttons in the scroll list
         private int LastIndexAllFriendsButtons = -1;
 
@@ -61,6 +67,18 @@ namespace Friends
 
             SearchTextBox.onValueChanged.AddListener(OnSearchTextBoxChange); // TODO
 
+            FriendRequestsCount.text = "";
+            var countResponse = await Gaos.Friends.GetCountOfFriendRequests.CallAsync();
+            if (countResponse == null)
+            {
+                return;
+            }
+            if (countResponse.Count > 0)
+            {
+                FriendRequestsCount.text = countResponse.Count.ToString();
+            }
+
+            UpdateUnreadMessagesCountsLoop().Forget();
         }
 
         private async UniTask  GuiReadAllUsersList()
@@ -160,12 +178,15 @@ namespace Friends
         private void FilterUsers(string substring)
         {
             LastIndexFilteredUsers = -1;
+            UserToFilteredUsersIndex.Clear();
+
 
             for (int i = 0; i <= LastIndexAllUsers; i++)
             {
                 if (substring == "" || substring == null || AllUsers[i].UserName.Contains(substring))
                 {
                     FilteredUsers[++LastIndexFilteredUsers] = i;
+                    UserToFilteredUsersIndex.Add(AllUsers[i].UserId, LastIndexFilteredUsers);
                 }
             }
         }
@@ -184,6 +205,15 @@ namespace Friends
             RemoveAllFriendsButtons();
             SearchTextBox.text = ""; 
             Init().Forget();
+        }
+
+        public void OnDisable()
+        {
+            UpdateUnreadMessagesCountsLoop_IsFinished = true;
+            if (UpdateUnreadMessagesCountsLoop_CancellationTokenSource != null)
+            {
+                UpdateUnreadMessagesCountsLoop_CancellationTokenSource.Cancel();
+            }
         }
 
         public void DisplayTitle()
@@ -370,6 +400,115 @@ namespace Friends
             OnSearchButtonClickAsync(SearchTextBox.text).Forget();
             DisplayTitle();
         }
+
+        public async UniTask UpdateUnreadMessagesCounts()
+        {
+            const string METHOD_NAME = "UpdateUnreadMessagesCounts";
+
+            if (LastIndexFilteredUsers < 0)
+                return;
+            
+            for (int i = 0; i <= LastIndexFilteredUsers; i++)
+            {
+                int indexAll = FilteredUsers[i];
+                FriendModel user = AllUsers[indexAll];
+
+                Gaos.Routes.Model.ChatRoomJson.GetUserToFriendChatRoomResponse chatRoomResponse =
+                    await Gaos.ChatRoom.ChatRoom.GetUserToFriendChatRoom.CallAsync(user.UserId);
+                if (chatRoomResponse == null)
+                {
+                    Debug.Log($"{CLASS_NAME}:{METHOD_NAME} Failed to get chat room for friend {user.UserName}");
+                    continue;
+                }
+                int chatRoomId = (int)chatRoomResponse.ChatRoomId;
+
+                Gaos.Routes.Model.ChatRoomJson.GetUnreadMessagesCountResponse unreadResponse =
+                    await Gaos.ChatRoom.ChatRoom.GetUnreadMessagesCount.CallAsync(chatRoomId, Gaos.Context.Authentication.GetUserId());
+                if (unreadResponse == null)
+                {
+                    Debug.Log($"{CLASS_NAME}:{METHOD_NAME}: ERROR: Failed to get unread message count for friend {user.UserName}");
+                }
+                int unreadCount = unreadResponse.count;
+
+                int index_filtered = 0;
+                if (!UserToFilteredUsersIndex.TryGetValue(user.UserId, out index_filtered))
+                {
+                    Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: could not get index_filtered for userId");
+                    continue;
+                }
+                int index = 0;
+                if (index_filtered < 0 || index_filtered > LastIndexFilteredUsers)
+                {
+                    Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: index_filtered out of range");
+                    continue;
+                }
+                index = FilteredUsers[index_filtered];
+                if (index < 0 || index > LastIndexAllFriendsButtons)
+                {
+                    Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: index out of range");
+                    continue;
+                }
+                GameObject friendButton = AllFriendsButtons[index];
+                if (friendButton == null)
+                {
+                    Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: friendButton is null");
+                    continue;
+                }
+                Transform unreadCountTransform = friendButton.transform.Find("Chat/UnreadCount");
+                if (unreadCountTransform != null)
+                {
+                    TextMeshProUGUI unreadCountText = unreadCountTransform.GetComponent<TextMeshProUGUI>();
+                    if (unreadCountText != null)
+                    {
+                        unreadCountText.text = unreadCount > 0 ? unreadCount.ToString() : "";
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: unreadCountText is null");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: unreadCountTransform is null");
+                }
+            }
+        }
+
+        private bool UpdateUnreadMessagesCountsLoop_IsFinished = false;
+        private System.Threading.CancellationTokenSource UpdateUnreadMessagesCountsLoop_CancellationTokenSource;  
+
+        private async UniTaskVoid UpdateUnreadMessagesCountsLoop()
+        {
+            const string METHOD_NAME = "UpdateUnreadMessagesCountsLoop()";
+
+            UpdateUnreadMessagesCountsLoop_CancellationTokenSource = new System.Threading.CancellationTokenSource();
+            UpdateUnreadMessagesCountsLoop_IsFinished = false;
+
+            while (true)
+            {
+                if (UpdateUnreadMessagesCountsLoop_IsFinished)
+                {
+                    break;
+                }
+
+                await UpdateUnreadMessagesCounts();
+
+
+                // sleep
+                try
+                {
+                    await UniTask.Delay(System.TimeSpan.FromSeconds(1), ignoreTimeScale: false, PlayerLoopTiming.Update, UpdateUnreadMessagesCountsLoop_CancellationTokenSource.Token);
+                }
+                catch (System.OperationCanceledException)
+                {
+                    if (UpdateUnreadMessagesCountsLoop_IsFinished)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
 
     }
 }

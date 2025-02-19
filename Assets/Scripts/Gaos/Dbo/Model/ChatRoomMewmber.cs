@@ -9,6 +9,5 @@ namespace Gaos.Dbo.Model
         public ChatRoom? ChatRoom;
         public int UserId;
         public User? User;
-
     }
 }

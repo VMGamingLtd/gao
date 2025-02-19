@@ -238,6 +238,45 @@ namespace Gaos.ChatRoom.ChatRoom
                 throw ex;
             }
         }
+    }
+
+    public class GetUnreadMessagesCount
+    {
+        public readonly static string CLASS_NAME = typeof(GetUnreadMessagesCount).Name;
+        public static async UniTask<Gaos.Routes.Model.ChatRoomJson.GetUnreadMessagesCountResponse> CallAsync(int chatRoomId, int userId)
+        {
+            const string METHOD_NAME = "CallAsync()";
+            try
+            {
+
+                Gaos.Routes.Model.ChatRoomJson.GetUnreadMessagesCountRequest request = new Gaos.Routes.Model.ChatRoomJson.GetUnreadMessagesCountRequest();
+                request.ChatRoomId = chatRoomId;
+                request.UserId = userId;
+                string requestJsonStr = JsonConvert.SerializeObject(request);
+                Gaos.Api.ApiCall apiCall = new Gaos.Api.ApiCall("api/chatRoom/getUnreadMessagesCount", requestJsonStr);
+                await apiCall.CallAsync();
+                if (apiCall.IsResponseError)
+                {
+                    Debug.LogError($"ERROR: error calling getUnreadMessagesCount");
+                    throw new System.Exception("error calling getUnreadMessagesCount");
+                }
+                else
+                {
+                    Gaos.Routes.Model.ChatRoomJson.GetUnreadMessagesCountResponse response = JsonConvert.DeserializeObject<Gaos.Routes.Model.ChatRoomJson.GetUnreadMessagesCountResponse>(apiCall.ResponseJsonStr);
+                    if (response.IsError == true)
+                    {
+                        Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: error calling getUnreadMessagesCount: {response.ErrorMessage}");
+                        throw new System.Exception($"error calling getUnreadMessagesCount: {response.ErrorMessage}");
+                    }
+                    return response;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
+                throw ex;
+            }
+        }
 
     }
 

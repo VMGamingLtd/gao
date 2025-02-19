@@ -207,6 +207,50 @@ namespace Gaos.Friends
         }
     }
 
+    public class GetCountOfFriendRequests
+    {
+        public static readonly string CLASS_NAME = typeof(GetCountOfFriendRequests).Name;
+
+        public static async UniTask<Gaos.Routes.Model.FriendJson.GetCountOfFriendRequestsResponse> CallAsync()
+        {
+            const string METHOD_NAME = "api/friends/getCountOfFriendRequests";
+            try
+            {
+                var request = new Gaos.Routes.Model.FriendJson.GetCountOfFriendRequestsRequest
+                {
+                };
+
+                string requestJsonStr = JsonConvert.SerializeObject(request);
+
+                Gaos.Api.ApiCall apiCall = new Gaos.Api.ApiCall("api/friends/getCountOfFriendRequests", requestJsonStr);
+                await apiCall.CallAsync();
+
+                if (apiCall.IsResponseError)
+                {
+                    Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: ERROR: error retrieving friend requests.");
+                    return null;
+                }
+                else
+                {
+                    var response = JsonConvert.DeserializeObject<Gaos.Routes.Model.FriendJson.GetCountOfFriendRequestsResponse>(apiCall.ResponseJsonStr);
+
+                    if (response.IsError == true)
+                    {
+                        Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {response.ErrorMessage}");
+                        return null;
+                    }
+
+                    return response;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"{CLASS_NAME}:{METHOD_NAME}: ERROR: {ex.Message}");
+                return null;
+            }
+        }
+    }
+
     public class AcceptFriendRequest
     {
         public readonly static string CLASS_NAME = typeof(AcceptFriendRequest).Name;
