@@ -36,4 +36,8 @@ In gmeobject Canvas / MultiplayerGroupTab / MultiplayerGroupTab script
 In gmeobject Canvas / MultiplayerGroupTab / MultiplayerGroupRequests script
     - set reference  MultiplayerGroupTab
 
+8) Remove !!!!!!!!!!!!!
+In MESSAGEMANAGER / ChatMessageLine / Header / Username
+  - remove script UsernameLoad
+
 

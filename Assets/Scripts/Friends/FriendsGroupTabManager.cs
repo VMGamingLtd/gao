@@ -50,6 +50,9 @@ namespace Friends
 
         public GameObject groupChatButton;
 
+        // reference to Content / TopButtons / Chat / UnreadCount
+        public TMP_Text groupChatButton_UnreadCpunt;
+
         private string State_RemoveFromGroupDialog_message;
         private int State_RemoveFromGroupDialog_index_filtered;
 
@@ -204,6 +207,7 @@ namespace Friends
             await GuiReadAllUsersList();
 
             UpdateUnreadMessagesCountsLoop().Forget();
+            UpdateUnreadMessagesCountsForGroupLoop().Forget();
 
         }
 
@@ -495,6 +499,12 @@ namespace Friends
                 UpdateUnreadMessagesCountsLoop_CancellationTokenSource.Cancel();
             }
 
+            UpdateUnreadMessagesCountsForGroupLoop_IsFinished = true;
+            if (UpdateUnreadMessagesCountsForGroupLoop_CancellationTokenSource != null)
+            {
+                UpdateUnreadMessagesCountsForGroupLoop_CancellationTokenSource.Cancel();
+            }
+
         }
 
         public void DisplayTitle()
@@ -716,6 +726,72 @@ namespace Friends
                 catch (System.OperationCanceledException)
                 {
                     if (UpdateUnreadMessagesCountsLoop_IsFinished)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        public async UniTask UpdateUnreadMessagesCountsForGroup()
+        {
+            const string METHOD_NAME = "UpdateUnreadMessagesCountsForGroup";
+
+            Gaos.Routes.Model.ChatRoomJson.GetGroupChatRoomResponse responseChatRoom = await Gaos.ChatRoom.ChatRoom.GetGroupChatRoom.CallAsync();
+            if (responseChatRoom == null)
+            {
+                    Debug.Log($"{CLASS_NAME}:{METHOD_NAME} Failed to get chat room for group");
+                return;
+            }
+            int chatRoomId = (int)responseChatRoom.ChatRoomId;
+
+            Gaos.Routes.Model.ChatRoomJson.GetUnreadMessagesCountResponse unreadResponse =
+                await Gaos.ChatRoom.ChatRoom.GetUnreadMessagesCount.CallAsync(chatRoomId, Gaos.Context.Authentication.GetUserId());
+            if (unreadResponse == null)
+            {
+                Debug.Log($"{CLASS_NAME}:{METHOD_NAME}: ERROR: Failed to get unread message count for group");
+            }
+            int unreadCount = unreadResponse.count;
+
+            if (groupChatButton_UnreadCpunt != null)
+            {
+                groupChatButton_UnreadCpunt.text = unreadCount > 0 ? unreadCount.ToString() : "";
+            }
+            else 
+            {
+                Debug.LogWarning($"{CLASS_NAME}:{METHOD_NAME}: groupChatButton_UnreadCpunt is null");
+            }
+
+        }
+
+        private bool UpdateUnreadMessagesCountsForGroupLoop_IsFinished = false;
+        private System.Threading.CancellationTokenSource UpdateUnreadMessagesCountsForGroupLoop_CancellationTokenSource;  
+
+        private async UniTaskVoid UpdateUnreadMessagesCountsForGroupLoop()
+        {
+            const string METHOD_NAME = "UpdateUnreadMessagesCountsForGroupLoop()";
+
+            UpdateUnreadMessagesCountsForGroupLoop_CancellationTokenSource = new System.Threading.CancellationTokenSource();
+            UpdateUnreadMessagesCountsForGroupLoop_IsFinished = false;
+
+            while (true)
+            {
+                if (UpdateUnreadMessagesCountsForGroupLoop_IsFinished)
+                {
+                    break;
+                }
+
+                await UpdateUnreadMessagesCountsForGroup();
+
+
+                // sleep
+                try
+                {
+                    await UniTask.Delay(System.TimeSpan.FromSeconds(1), ignoreTimeScale: false, PlayerLoopTiming.Update, UpdateUnreadMessagesCountsForGroupLoop_CancellationTokenSource.Token);
+                }
+                catch (System.OperationCanceledException)
+                {
+                    if (UpdateUnreadMessagesCountsForGroupLoop_IsFinished)
                     {
                         break;
                     }
